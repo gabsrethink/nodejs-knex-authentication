@@ -1,4 +1,7 @@
 import UserRepository from '../repositories/UserRepository';
+import bcrypt from 'bcrypt';
+import { NextFunction } from 'express';
+import { CustomError } from '../middlewares/errorHandlerMiddleware';
 
 export async function register(name: string, email: string, password: string) {
   try {
@@ -8,10 +11,20 @@ export async function register(name: string, email: string, password: string) {
   }
 }
 
-export async function login(email: string, password: string) {
+export async function login(
+  email: string,
+  password: string,
+  next: NextFunction,
+) {
   try {
-    return await UserRepository.login(email, password);
+    const user = await UserRepository.getUser(email, next);
+    const validPass = await bcrypt.compare(password, user.password);
+    if (!validPass) {
+      throw new CustomError('Invalid password!', 401);
+    }
+    return true;
   } catch (error) {
-    console.log(error);
+    next(error);
+    return false;
   }
 }

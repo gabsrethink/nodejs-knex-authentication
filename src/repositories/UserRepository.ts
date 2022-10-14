@@ -1,11 +1,11 @@
 import knex from '../database/index';
 import bcrypt from 'bcrypt';
-
-const saltRounds = 8;
+import { NextFunction } from 'express';
+import { CustomError } from '../middlewares/errorHandlerMiddleware';
 
 export async function register(name: string, email: string, password: string) {
   try {
-    password = await bcrypt.hash(password, saltRounds);
+    password = await bcrypt.hash(password, 8);
     const results = await knex('users').insert({ name, email, password });
     return results;
   } catch (error) {
@@ -13,22 +13,16 @@ export async function register(name: string, email: string, password: string) {
   }
 }
 
-export async function login(email: string, password: string) {
+export async function getUser(email: string, next: NextFunction) {
   try {
     const user = await knex('users').first('*').where({ email });
     if (!user) {
-      console.log('No such user found:');
-    } else {
-      const validPass = await bcrypt.compare(password, user.password);
-      if (validPass) {
-        return console.log('Deu bom!');
-      } else {
-        console.log('Incorrect password for user:', email);
-      }
+      throw new CustomError('User not found!', 401);
     }
+    return user;
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 }
 
-export default { register, login };
+export default { register, getUser };

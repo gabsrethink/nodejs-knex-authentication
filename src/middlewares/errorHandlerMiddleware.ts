@@ -12,7 +12,7 @@ export class CustomError {
 }
 
 function handleError(
-  error: CustomError,
+  error: any,
   _request: Request,
   response: Response,
   _next: NextFunction,
@@ -20,7 +20,7 @@ function handleError(
   let customError = error;
 
   if (!(error instanceof CustomError)) {
-    customError = new CustomError('Something went wrong!');
+    customError = new CustomError(error.message);
   }
 
   response.status((customError as CustomError).status).send(customError);
