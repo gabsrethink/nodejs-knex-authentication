@@ -20,7 +20,8 @@ function handleError(
   let customError = error;
 
   if (!(error instanceof CustomError)) {
-    customError = new CustomError(error.message);
+    let status = response.locals.status ? response.locals.status : 500;
+    customError = new CustomError(error.message, status);
   }
 
   response.status((customError as CustomError).status).send(customError);

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { CustomError } from '../middlewares/errorHandlerMiddleware';
-import { register, login } from '../services/user.service';
+import { CustomError } from '../middlewares/error';
+import { validate } from '../middlewares/validation';
+import { register, login, userProfile } from '../services/user.service';
 
 const signUp = async (
   request: Request,
@@ -9,11 +10,12 @@ const signUp = async (
 ) => {
   try {
     const { name, email, password, confirmPassword } = request.body;
+    validate({ name, email, password }, next, response);
     if (password !== confirmPassword) {
       throw new CustomError('Passwords must be the same!', 400);
     }
-    await register(name, email, password);
-    response.status(200).send('Registered successfully!');
+    await register(name, email, password, next);
+    response.status(200).send('User registered successfully');
   } catch (error) {
     next(error);
   }
@@ -26,13 +28,29 @@ const logIn = async (
 ) => {
   try {
     const { email, password } = request.body;
-    const validLogin = await login(email, password, next);
-    if (validLogin) {
-      response.status(200).send('Logged in successfully!');
+    const loginToken = await login(email, password, next);
+    if (loginToken) {
+      response.status(200).send({ message: 'Success', token: loginToken });
     }
   } catch (error) {
     next(error);
   }
 };
 
-export default { signUp, logIn };
+const profile = async (
+  _request: Request,
+  response: Response,
+  next: NextFunction,
+) => {
+  try {
+    const returnService = await userProfile(response.locals.email, next);
+    return response
+      .status(200)
+      .send({ name: returnService.name, email: returnService.email });
+  } catch (error) {
+    next(error);
+    return false;
+  }
+};
+
+export default { signUp, logIn, profile };
