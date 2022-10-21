@@ -14,7 +14,7 @@ const signUp = async (
     if (password !== confirmPassword) {
       throw new CustomError('Passwords must be the same!', 400);
     }
-    await register(name, email, password, next);
+    await register(name, email, password);
     response.status(200).send('User registered successfully');
   } catch (error) {
     next(error);

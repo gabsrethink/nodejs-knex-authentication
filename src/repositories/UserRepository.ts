@@ -3,20 +3,13 @@ import bcrypt from 'bcrypt';
 import { NextFunction } from 'express';
 import { CustomError } from '../middlewares/error';
 
-export async function register(
-  name: string,
-  email: string,
-  password: string,
-  next: NextFunction,
-) {
+export async function register(name: string, email: string, password: string) {
   try {
     password = await bcrypt.hash(password, 8);
     const results = await knex('users').insert({ name, email, password });
-    return results;
+    return await results;
   } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') {
-      next(new CustomError('Email provided already exists', 409));
-    }
+    throw error;
   }
 }
 

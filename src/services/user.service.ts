@@ -4,16 +4,16 @@ import jwt from 'jsonwebtoken';
 import { NextFunction } from 'express';
 import { CustomError } from '../middlewares/error';
 
-export async function register(
-  name: string,
-  email: string,
-  password: string,
-  next: NextFunction,
-) {
+export async function register(name: string, email: string, password: string) {
   try {
-    return await UserRepository.register(name, email, password, next);
+    return await UserRepository.register(name, email, password);
   } catch (error) {
-    console.log(error);
+    const err = new CustomError('Erro interno', 500);
+    if (error.code === 'ER_DUP_ENTRY') {
+      err.message = 'Email provided already exists';
+      err.status = 409;
+    }
+    throw err;
   }
 }
 
