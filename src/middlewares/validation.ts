@@ -1,4 +1,4 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Response, Request } from 'express';
 import * as Yup from 'yup';
 
 export type registerUser = {
@@ -11,9 +11,9 @@ const nameRegex = /^[a-z ,.'-]+$/i;
 const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
 export async function validate(
-  user: any,
-  next: NextFunction,
+  request: Request,
   response: Response,
+  next: NextFunction,
 ) {
   try {
     const userSchema = Yup.object().shape({
@@ -31,7 +31,8 @@ export async function validate(
         .required('password property is required')
         .min(8),
     });
-    await userSchema.validate(user);
+    await userSchema.validate(request.body);
+    next();
   } catch (error) {
     response.locals.status = 400;
     next(error);

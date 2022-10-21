@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { CustomError } from '../middlewares/error';
-import { validate } from '../middlewares/validation';
 import { register, login, userProfile } from '../services/user.service';
 
 const signUp = async (
@@ -10,7 +9,6 @@ const signUp = async (
 ) => {
   try {
     const { name, email, password, confirmPassword } = request.body;
-    validate({ name, email, password }, next, response);
     if (password !== confirmPassword) {
       throw new CustomError('Passwords must be the same!', 400);
     }

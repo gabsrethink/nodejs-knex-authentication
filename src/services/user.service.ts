@@ -8,12 +8,10 @@ export async function register(name: string, email: string, password: string) {
   try {
     return await UserRepository.register(name, email, password);
   } catch (error) {
-    const err = new CustomError('Erro interno', 500);
     if (error.code === 'ER_DUP_ENTRY') {
-      err.message = 'Email provided already exists';
-      err.status = 409;
+      throw new CustomError('Email provided already exists', 409);
     }
-    throw err;
+    throw error;
   }
 }
 
