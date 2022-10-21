@@ -17,13 +17,12 @@ export async function register(name: string, email: string, password: string) {
   }
 }
 
-export async function login(
-  email: string,
-  password: string,
-  next: NextFunction,
-) {
+export async function login(email: string, password: string) {
   try {
-    const user = await UserRepository.getUser(email, next);
+    const user = await UserRepository.getUser(email);
+    if (!user) {
+      throw new CustomError('User not found!', 401);
+    }
     const validPass = await bcrypt.compare(password, user.password);
     if (!validPass) {
       throw new CustomError('Invalid password!', 401);
@@ -37,14 +36,13 @@ export async function login(
       return token;
     }
   } catch (error) {
-    next(error);
-    return false;
+    throw error;
   }
 }
 
 export async function userProfile(email: string, next: NextFunction) {
   try {
-    const user = await UserRepository.getUser(email, next);
+    const user = await UserRepository.getUser(email);
     return user;
   } catch (error) {
     next(error);

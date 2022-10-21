@@ -1,7 +1,5 @@
 import knex from '../database/index';
 import bcrypt from 'bcrypt';
-import { NextFunction } from 'express';
-import { CustomError } from '../middlewares/error';
 
 export async function register(name: string, email: string, password: string) {
   try {
@@ -13,15 +11,12 @@ export async function register(name: string, email: string, password: string) {
   }
 }
 
-export async function getUser(email: string, next: NextFunction) {
+export async function getUser(email: string) {
   try {
     const user = await knex('users').first('*').where({ email });
-    if (!user) {
-      throw new CustomError('User not found!', 401);
-    }
     return user;
   } catch (error) {
-    next(error);
+    throw error;
   }
 }
 

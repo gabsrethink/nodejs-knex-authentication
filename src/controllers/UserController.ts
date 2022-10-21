@@ -28,7 +28,7 @@ const logIn = async (
 ) => {
   try {
     const { email, password } = request.body;
-    const loginToken = await login(email, password, next);
+    const loginToken = await login(email, password);
     if (loginToken) {
       response.status(200).send({ message: 'Success', token: loginToken });
     }

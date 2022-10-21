@@ -15,7 +15,7 @@ const profileToken = async (
   } else {
     try {
       const decoded: any = jwt.decode(token);
-      const user = await UserRepository.getUser(decoded.email, next);
+      const user = await UserRepository.getUser(decoded.email);
       jwt.verify(token, user.password);
       response.locals.email = user.email;
       next();
